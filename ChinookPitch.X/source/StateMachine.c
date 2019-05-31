@@ -41,25 +41,13 @@ void StateScheduler(void)
   //============================
   Wdt.Clear();
   //============================
- 
-  
   
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Current state == StateInit
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateInit
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   if (pStatePitch == &StateInit)
   {
-    if (INIT_2_IDLE)
-    {
-      pStatePitch = &StateIdlePitch;        // Idle state
-    }
-    else
-    {
-      pStatePitch = &StateInit;        // Go to Error state by default
-    }
+    pStatePitch = &StateIdlePitch;        // Idle state
   }
  
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,34 +55,26 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   if (pStatePitch == &StateIdlePitch)
   {
-    if (IDLE_2_BRAKE)
+    if (oCmdBrake)
     {
       pStatePitch = &StateBrakePitch;     // AeroBrake state
     }
-    else if (IDLE_2_DATA)
+    else if (oSendPitchValue)
     {
       pStatePitch = &StateSendDataPitch;  // SendData state
     }
-    else if(IDLE_2_MOTION)
+    else if((oCmdDownPitch || oCmdUpPitch || (IsPitchDone())))
     {
       pStatePitch = &StateMotorMotion;    // Motion state
     }   
-    else if(IDLE_2_REG)
+    else if(oMaintainPitch)
     {
       pStatePitch = &StateRegPitch;       // Regulator state
     }
-    else if (IDLE_2_ACQ)
+    else if (oFlagAcq)
     {
       pStatePitch = &StateAcq;       // Acquisition state
     }
-//    else if (IDLE_2_DATA)
-//    {
-//      pStatePitch = &StateSendDataPitch;  // SendData state
-//    }
-//    else if (IDLE_2_CALIB)
-//   {
-//      pStatePitch = &StateCalibPitch;     // Calib state
-//    }
     else
     {
       pStatePitch = &StateIdlePitch;      // Go to Error state by default
@@ -106,17 +86,13 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateAcq)
   {
-    if (ACQ_2_BRAKE)
+    if (oCmdBrake)
     {
       pStatePitch = &StateBrakePitch;     // AeroBrake state
     }  
-    else if (ACQ_2_IDLE)
-    {
-      pStatePitch = &StateIdlePitch;      // Idle state
-    }
     else
     {
-      pStatePitch = &StateAcq;       // Go to Error state by default
+      pStatePitch = &StateIdlePitch;      // Idle state
     }
   }
 
@@ -125,13 +101,9 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateCalibPitch)
   {
-    if (CALIB_2_SEND)
+    if (oCmdCalib)
     {
       pStatePitch = &StateSendDataPitch;   // Send Data state
-    }
-    else if (CALIB_2_IDLE)
-    {
-      pStatePitch = &StateIdlePitch;      // Idle state
     }
     else
     {
@@ -144,13 +116,9 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateMotorMotion)
   {
-    if (MOTION_2_ACQ)
+    if (oFlagAcq)
     {
       pStatePitch = &StateAcq;       // Acquisition state
-    }
-    else if (MOTION_2_IDLE)
-    {
-      pStatePitch = &StateIdlePitch;      // Idle state
     }
     else
     {
@@ -163,14 +131,7 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateSendDataPitch)
   {
-    if (DATA_2_IDLE)
-    {
-      pStatePitch = &StateIdlePitch;        // Idle state
-    }
-    else
-    {
-      pStatePitch = &StateSendDataPitch;    // Go to Error state by default
-    }
+    pStatePitch = &StateIdlePitch;        // Idle state
   }
   
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -178,7 +139,7 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateBrakePitch)
   {
-    if (BRAKE_2_ACQ)
+    if (oFlagAcq)
     {
       pStatePitch = &StateAcq;       // Brake Aero state
     }
@@ -193,7 +154,7 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateRegPitch)
   {
-    if (REG_2_IDLE)
+    if (!oMaintainPitch)
     {
       pStatePitch = &StateAcq;       // Idle state
     }
@@ -212,30 +173,7 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStatePitch == &StateError)
   {
-    if (ERROR_2_IDLE)
-    {
       pStatePitch = &StateInit;       // Initialization state
-    }
-//    else if (ERROR_2_STOP)
-//    {
-//      pStatePitch = &StateStopPitch;       // Stop state
-//    }
-//    else if (ERROR_2_CALIB)
-//    {
-//      pStatePitch = &StateCalibPitch;      // Calibration state
-//    }
-//    else if (ERROR_2_UP)
-//    {
-//      pStatePitch = &StateUpPitch;         // Up state
-//    }
-//    else if (ERROR_2_BRAKE)
-//    {
-//      pStatePitch = &StateBrakePitch;      // Aero brake state
-//    }
-    else
-    {
-      pStatePitch = &StateError;      // Go to Error state by default
-    }
   }
   
 //  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -253,26 +191,27 @@ void StateScheduler(void)
 //===============================================================
 void StateInit(void)
 {
-
-  INTDisableInterrupts();   // Disable all interrupts of the system.
-  initShieldPins();
-  INIT_PORTS;
-//  INIT_SPI;
-  INIT_TIMER;
-//  INIT_INPUT_CAPTURE;
-  INIT_PWM;
-//  INIT_ADC;
-//  INIT_UART;
-//  INIT_SKADI;
-  INIT_CAN;
-//  INIT_I2C;
-//  INIT_WDT;
-  START_INTERRUPTS;
-  
- 
-   firstRun = 1 ;
-   oPitchMode =1 ; 
-   oFlagAcq=1;
+    INTDisableInterrupts();   // Disable all interrupts of the system.
+    initShieldPins();
+    InitPorts();
+//  InitSpi();
+    InitTimer();
+//  InitInputCapture();
+    InitPwm();
+//  InitAdc();
+//  InitUART();
+//  InitSkadi();
+    InitCan();
+//  InitI2c();
+//  InitWdt();
+    StartInterrupts();
+    
+    current_pitch = 0;
+    target_pitch = 0;
+    
+    firstRun = 1 ;
+    oPitchMode =1 ; 
+    oFlagAcq=1;
 }
 
 //===============================================================
@@ -281,24 +220,6 @@ void StateInit(void)
 //===============================================================
 void StateAcq(void)
 {
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // VARIABLE DECLARATIONS
-  
-  
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-    
-    
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // FIRST PART OF STATE
-  // Developper should add a small description of expected behavior
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // SECOND PART OF STATE
   // Developper should add a small description of expected behavior
@@ -390,54 +311,6 @@ void StateAcq(void)
       Uart.PutTxFifoBuffer(UART6, &uart6Data);            // Put data received in TX FIFO buffer
     }
   }
-
-  
-  ///////////////
- 
-  
-  
-  
-  
-  
-  //oFlagAcq  = 0 ; 
-  
-  ///////////
-}
-
-//===============================================================
-// Name     : State2
-// Purpose  : TBD.
-//===============================================================
-void State2(void)
-{
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // VARIABLE DECLARATIONS
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-    
-    
-    
-    
-    
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // FIRST PART OF STATE
-  // Developper should add a small description of expected behavior
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // SECOND PART OF STATE
-  // Developper should add a small description of expected behavior
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
 }
 
 //===============================================================
@@ -447,105 +320,61 @@ void State2(void)
 //===============================================================
 void StateError(void)
 {
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // VARIABLE DECLARATIONS
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // FIRST PART OF STATE
-  // Developper should add a small description of expected behavior
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // SECOND PART OF STATE
-  // Developper should add a small description of expected behavior
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
+    
 }
 
 void StateMotorMotion(void)
 {
+    int n = 0;
+    for(n = 0; n < 50000; ++n);
     
-      int n = 0 ; 
-      for ( n=0; n < 9000; n++ )
-      {
-      
-      }
-    
-    
-    
-    if ( oPitchMode){
-  
-
-        if (oCmdUpPitch )
-        {
-
-        LED_DEBUG0_ON;
-        oneStep(FWD,QRTRSTEP);
-       
-         }else{
-
-         LED_DEBUG0_OFF;
-      
-         }
-
-
-     if (oCmdDownPitch )
+    if(oPitchMode == PITCH_MODE_MANUAL)
     {
-        LED_DEBUG1_ON;
-        oneStep(BWD,QRTRSTEP);
-     }  else 
+        if (oCmdUpPitch)
         {
-         LED_DEBUG1_OFF;
-        }  
-    }else
-        
-        
-         {
-        
-        if(!oPitchMode){
-                
-        if (oCmdUpPitch  )
-          {
+            LED_DEBUG0_ON();
+            oneStep(FWD, QRTRSTEP);
+            oCmdDownPitch = 0;
+            oPitchDone = 1;
+        }
+        else
+        {
+            LED_DEBUG0_OFF();
+        }
+
+        if (oCmdDownPitch)
+        {
+            LED_DEBUG1_ON();
+            oneStep(BWD, QRTRSTEP);
+            oCmdUpPitch = 0;
+            oPitchDone = 1;
+        }
+        else 
+        {
+             LED_DEBUG1_OFF();
+        }
+    }
+    else if(oPitchMode == PITCH_MODE_AUTOMATIC)
+    {
+        int n; 
+        for (n = 0; n < 9000; n++);
+
+        int direction;
+        if(current_pitch < target_pitch)
+            direction = FWD;
+        else
+            direction = BWD;
+
+        while(current_pitch != target_pitch)
+        {
+            // Quarter step in the direction
+            oneStep(direction, QRTRSTEP);
             
-            while ( pitchValue<=setPitch){
-                    for ( n=0; n < 20000; n++ ) // 200000 pour le 300
-                    {}
-    
-            LED_DEBUG1_TOGGLE;
-            oneStep(FWD,FULSTEP);
-            // pitchValue= pitchValue+0.01;
-            }
-            oCmdUpPitch=0;  
-            oPitchDone =1; 
-           // SEND_PITCH_DONE;
-          }
-        
-         if (oCmdDownPitch  )
-             
-            while ( pitchValue>=setPitch){
-                for ( n=0; n < 20000; n++ )
-                    {}
-            
-            oneStep(BWD,FULSTEP);
-           // pitchValue= pitchValue-0.01;
-            }
-            oCmdDownPitch = 0 ; 
-            oPitchDone =1 ; 
-            //SEND_PITCH_DONE;
-          }
+            for(n = 0; n < 100000; ++n);
+        }
     }
     
-    oFlagAcq =1;
+    oFlagAcq = 1;
     SEND_PITCH_DONE;
 }
 
@@ -554,34 +383,26 @@ void StateCalibPitch(void)
   SetZeroPitch();
 }
 
-
 void StateIdlePitch(void){}
 
 void StateBrakePitch(void)
 {
-
-    while ( pitchValue >10)
+    /*
+    while (current_pitch > 10)
     {
-        
-        
-        int n = 0 ; 
-      for ( n=0; n < 100000; n++ )
-      {
-      
-      }
+        int n; 
+        for (n = 0; n < 100000; n++);
     
-        if ( pitchValue>=180)
+        if (current_pitch >= 180)
         {
-        oneStep(FWD,FULSTEP);
-        }else
+            oneStep(FWD, FULSTEP);
+        }
+        else
         {
-        oneStep(BWD,FULSTEP);
-        
+            oneStep(BWD, FULSTEP);
         } 
     }
-
-
-
+    */
 }
 
 //void StateAcqPitch(void){}
@@ -592,23 +413,19 @@ void StateRegPitch(void){}
 
 void setUpPitch(void)
 {
-    
     int n;
+    for (n = 0; n < 200000; n++);
     
-        
-        for (n=0;n<200000;n++){}
-        LED_DEBUG1_TOGGLE;
-      oneStep(FWD,QRTRSTEP);
-    
+    LED_DEBUG1_TOGGLE();
+    oneStep(FWD, QRTRSTEP);
 }
 
 void setDownPitch(void){
     int j;
-   while ( pitchValue>setPitch ){
+    while (pitchValue > setPitch)
+    {
+        for (j = 0; j < 200000; j++);
         
-        for (j=0;j<200000;j++){}
-        
-      oneStep(BWD,QRTRSTEP);
+        oneStep(BWD, QRTRSTEP);
     }
-
 }

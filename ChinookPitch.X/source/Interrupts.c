@@ -131,19 +131,18 @@ void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
 
 void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
 {
-  UINT8  i
-        ,iMax   // Read/write max 8 bytes/interrupt
-        ,data   // used in UartFifoWrite/Read functions
-        ;
+  UINT8 i,
+        iMax,   // Read/write max 8 bytes/interrupt
+        data;   // used in UartFifoWrite/Read functions
 
-	// TX interrupt handling
+  //===========================================================         
+  // TX interrupt handling
   //===========================================================
-
-  if ( INTGetEnable ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupts enabled
+  if (INTGetEnable(INT_SOURCE_UART_TX(UART6)))               // If TX interrupts enabled
   {
-    if ( INTGetFlag ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupt occured
+    if (INTGetFlag(INT_SOURCE_UART_TX(UART6)))               // If TX interrupt occured
     {
-      if ( UARTTransmitterIsReady(UART6) && !Uart.Var.uartTxFifo[UART6].bufEmpty )  // If TX buffer is ready to receive data and the user's TX buffer is not empty
+      if (UARTTransmitterIsReady(UART6) && !Uart.Var.uartTxFifo[UART6].bufEmpty)  // If TX buffer is ready to receive data and the user's TX buffer is not empty
       {
         if (Uart.Var.uartTxFifo[UART6].lineBuffer.length < 8)     // Write max 8 bytes/interrupt
         {
@@ -169,29 +168,27 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
       INTClearFlag(INT_SOURCE_UART_TX(UART6));                    // Clear the TX interrupt Flag
     }
   }
-  //===========================================================
   
-
-	// RX interrupt handling
   //===========================================================
-  if ( INTGetEnable ( INT_SOURCE_UART_RX(UART6) ) )               // If RX interrupts enabled
+  // RX interrupt handling
+  //===========================================================
+  if (INTGetEnable(INT_SOURCE_UART_RX(UART6)))                // If RX interrupts enabled
   {
-    if ( INTGetFlag ( INT_SOURCE_UART_RX(UART6) ) )               // If RX interrupt occured
+    if (INTGetFlag(INT_SOURCE_UART_RX(UART6)))               // If RX interrupt occured
     {
       i = 0;
       iMax = 8;                                                   // Read max 8 bytes/interrupt
-      while (   UARTReceivedDataIsAvailable(UART6)                // While RX data available
-            && !Uart.Var.uartRxFifo[UART6].bufFull                // and user's RX buffer not full
-            && (i < iMax)                                         // and under 8 bytes read
-            )
-      { // while ^
+      while (UARTReceivedDataIsAvailable(UART6) &&                // While RX data available
+            !Uart.Var.uartRxFifo[UART6].bufFull &&                // and user's RX buffer not full
+            (i < iMax))                                           // and under 8 bytes read
+      {
         data = UARTGetDataByte(UART6);                            // Get data for PIC32's RX FIFO buffer and copy it to user (next line)
-        if ( UartFifoWrite((void *) &Uart.Var.uartRxFifo[UART6], &data) < 0 ) // If copy to user did not work
+        if (UartFifoWrite((void*)&Uart.Var.uartRxFifo[UART6], &data) < 0) // If copy to user did not work
         {
           break;                                                  // Exit while loop
         }
         i++;
-      } // end while
+      }
 
       if (!Uart.Var.uartRxFifo[UART6].bufEmpty)                   // If there is data in the user's RX buffer
       {
@@ -201,7 +198,7 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
       INTClearFlag (INT_SOURCE_UART_RX(UART6) );                  // Clear the RX interrupt Flag
 
     }
-	}
+  }
   //===========================================================
 }
 //=============================================
@@ -404,169 +401,95 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
     // the highest priority pending event.
     CANRxMessageBuffer *message;
     
-    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT) {
+    // This means that channel 1 caused the event.
+    // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
+    // read the channel in the ISR to clear the event condition or as done
+    // here, disable the event source, and set an application flag to
+    // indicate that a message has been received. The event can be
+    // enabled by the application when it has processed one message.
+    // Note that leaving the event enabled would cause the CPU to keep
+    // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
+    // persistent (unless the not empty condition is cleared.)
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT) 
+    {
+        // This event fires when the steering wheel buttons
+        // are pressed (Pitch up, Pitch down buttons)
+        
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
-      // This means that channel 1 caused the event.
-      // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
-      // read the channel in the ISR to clear the event condition or as done
-      // here, disable the event source, and set an application flag to
-      // indicate that a message has been received. The event can be
-      // enabled by the application when it has processed one message.
-      // Note that leaving the event enabled would cause the CPU to keep
-      // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
-      // persistent (unless the not empty condition is cleared.)
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
+        message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
     
-      LED_CAN_ON;
+        LED_CAN_ON();
       
-      canVolant((message->data[1]<<8)|message->data[0]);
+        canVolant((message->data[1]<<8)|message->data[0]);
       
-      
-      
-      //canPitch(10);
-      
-      
-      
-      CANUpdateChannel(CAN1, CAN_CHANNEL1);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+        CANUpdateChannel(CAN1, CAN_CHANNEL1);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    } 
+    else if(CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT) 
+    {
+        // This event toggles the pitch mode
+        // between automatic and manual
+        
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
-    } else if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT) {
+        message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
+        int mode = *(int*)&message->data[0];
+        // Mode 0 = manual
+        // Mode 1 = automatic
+        if(mode == 0)
+        {
+            oPitchMode = PITCH_MODE_MANUAL;
+            LED_DEBUG4_ON();
+        }
+        else if(mode == 1)
+        {
+            oPitchMode = PITCH_MODE_AUTOMATIC;
+            LED_DEBUG4_OFF();
+        }
+        
+        SEND_PITCH_MODE;
 
-      // This means that channel 1 caused the event.
-      // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
-      // read the channel in the ISR to clear the event condition or as done
-      // here, disable the event source, and set an application flag to
-      // indicate that a message has been received. The event can be
-      // enabled by the application when it has processed one message.
-      // Note that leaving the event enabled would cause the CPU to keep
-      // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
-      // persistent (unless the not empty condition is cleared.)
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
-      oPitchMode ^=1 ; 
-      SEND_PITCH_MODE;
-
-      CANUpdateChannel(CAN1, CAN_CHANNEL2);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
-    } else if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL3_EVENT) {
-
-      // This means that channel 1 caused the event.
-      // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
-      // read the channel in the ISR to clear the event condition or as done
-      // here, disable the event source, and set an application flag to
-      // indicate that a message has been received. The event can be
-      // enabled by the application when it has processed one message.
-      // Note that leaving the event enabled would cause the CPU to keep
-      // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
-      // persistent (unless the not empty condition is cleared.)
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL3);
-     // memcpy((void *) &windTurbine, &message->data[0], 4);
-      float x = *(float *)&message->data[0];
-      canPitch( x );
-      
-      CANUpdateChannel(CAN1, CAN_CHANNEL3);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+        CANUpdateChannel(CAN1, CAN_CHANNEL2);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
-    
-    else if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL4_EVENT) {
-
-      // This means that channel 1 caused the event.
-      // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
-      // read the channel in the ISR to clear the event condition or as done
-      // here, disable the event source, and set an application flag to
-      // indicate that a message has been received. The event can be
-      // enabled by the application when it has processed one message.
-      // Note that leaving the event enabled would cause the CPU to keep
-      // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
-      // persistent (unless the not empty condition is cleared.)
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
-     // memcpy((void *) &windTurbine, &message->data[0], 4);
-      float x = *(float *)&message->data[0];
-      turbineValue= x ;
-      
-      CANUpdateChannel(CAN1, CAN_CHANNEL4);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-    }
-    else if(CANGetPendingEventCode(CAN1) == CAN_CHANNEL5_EVENT)
+    else if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL3_EVENT)
     {
         // Channel pour recevoir le nbr de steps a effectuer
-        CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
         
-        message = CANGetRxMessage(CAN1, CAN_CHANNEL5);
+        message = CANGetRxMessage(CAN1, CAN_CHANNEL3);
         float nbPitch = *(float*)&message->data[0];
         
-        int direction = signbit(nbPitch);
-        nbPitch = abs(nbPitch);
+        // Update the pitch target value
+        target_pitch = current_pitch + nbPitch;
+        LED_CAN_ON();
         
-        // Fullsteps
-        int fullsteps = (int)nbPitch;
-        nbPitch -= (float)fullsteps;
-        // Halfstep
-        nbPitch *= 2.0f;
-        int halfstep = (int)nbPitch;
-        nbPitch -= halfstep;
-        // Quarterstep
-        nbPitch *= 2.0f;
-        int quarterstep = (int)nbPitch;
-        nbPitch -= quarterstep;
-        
-        // Perform fullsteps pulses
-        int w;
-        int i;
-        for(i = 0; i < fullsteps; ++i)
-        {
-            if(direction)
-                oneStep(FWD, FULSTEP);
-            else
-                oneStep(BWD, FULSTEP);
-            
-            // Wait some approx 3ms time (100 RPM)
-            for(w = 0; w < 300000; ++w)
-            {
-                // nop
-            }
-        }
-        
-        // Halfstep
-        if(halfstep)
-        {
-            if(direction)
-                oneStep(FWD, HALFSTEP);
-            else
-                oneStep(BWD, HALFSTEP);
-        }
-        // Wait approx 3ms for 100 RPM
-        for(w = 0; w < 300000; ++w)
-        {
-            // nop
-        }
-        
-        // Quarterstep
-        if(quarterstep)
-        {
-            if(direction)
-                oneStep(FWD, QRTRSTEP);
-            else
-                oneStep(BWD, QRTRSTEP);
-        }
-        // Wait approx 3ms for 100 RPM
-        for(w = 0; w < 300000; ++w)
-        {
-            // nop
-        }
-        
-        CANUpdateChannel(CAN1, CAN_CHANNEL5);
-        CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+        CANUpdateChannel(CAN1, CAN_CHANNEL3);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
-    
+    else if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL4_EVENT)
+    {
+        // This event reads the Turbine RPM value from the CAN BUS
+        // If it detects it is higher than the max threshold, it fires the ROPS
+        // auto-stall break
+        
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+        message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
+        int x = *(int*)&message->data[0];
+        rops_steps = *(int*)&message->data[4];
+        
+        // Do we fire the ROPS ?
+        bROPS = x;
+        if(bROPS)
+            LED_DEBUG3_ON();
+        else
+            LED_DEBUG3_OFF();
+      
+        CANUpdateChannel(CAN1, CAN_CHANNEL4);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
   }
 
   // The CAN1 Interrupt flag is  cleared at the end of the interrupt routine.
@@ -576,98 +499,50 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // enabled will not have any effect because the base event is still present.
   INTClearFlag(INT_CAN1);
 }
- 
 
-/*
-void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
+void canVolant(UINT16 canMessage)
 {
-    if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) 
-    {
-        CANRxMessageBuffer *message;
-        
-        if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
-        {
-            CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-            message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
-            
-            LED_CAN_ON;
-            
-            oneStep(FWD, FULSTEP);
-            int x = (int)message->data[0];
-            if(x == 1)
-            {
-                oneStep(FWD, FULSTEP);
-            }
-            else if(x == 2)
-            {
-                oneStep(FWD, HALFSTEP);
-            }
-            else if(x == 4)
-            {
-                oneStep(FWD, QRTRSTEP);
-            }
-            
-            CANUpdateChannel(CAN1, CAN_CHANNEL1);
-            CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-        }
-    }
-}
-*/
-
-void canVolant(UINT16 canMessage) 
-{
-    if ( ((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON)&& !oPitchDone) // bouton de gauche
-    {
-        setPitch= pitchValue - PITCH_RESOLUTION;
-        LED_DEBUG2_ON;
-        oCmdDownPitch= 1 ; 
-    } else 
-        {
-        LED_DEBUG2_OFF;
-        oCmdDownPitch= 0 ; 
-        LED_DEBUG0_OFF;
-       
-        }
-        
-        
-    if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON)&& !oPitchDone)
-    {
-        setPitch= pitchValue + PITCH_RESOLUTION;
-        LED_DEBUG3_ON;
-        oCmdUpPitch= 1 ;   
-    } else
-        {
-         LED_DEBUG3_OFF;
-         oCmdUpPitch= 0 ;
-         LED_DEBUG0_OFF;
-      
-        }
-      
+    // If we are not in manual mode, discard this command
+    if(oPitchMode != PITCH_MODE_MANUAL)
+        return;
     
-    if (!( ((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON)&&(canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))
+    // Bouton de gauche
+    if (((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && !oPitchDone)
     {
-    oPitchDone=0;
-    
-    }
-     
-   
-    if ((turbineValue >=1000)){
-    
-        oCmdBrake = 1; 
-    }
+        target_pitch = current_pitch - PITCH_RESOLUTION;
+        LED_DEBUG2_ON();
+        oCmdDownPitch = 1;
+    } 
     else 
-    { 
-        oCmdBrake = 0;
+    {
+        LED_DEBUG2_OFF();
+        LED_DEBUG0_OFF();
+        oCmdDownPitch = 0;
     }
         
+    // Bouton de droite
+    if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON) && !oPitchDone)
+    {
+        target_pitch = current_pitch + PITCH_RESOLUTION;
+        LED_DEBUG3_ON(); 
+        oCmdUpPitch = 1;
+    } 
+    else
+    {
+        LED_DEBUG3_OFF();
+        LED_DEBUG0_OFF();
+        oCmdUpPitch = 0;
+    }
+    
+    if (!(((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && (canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))
+    {
+        oPitchDone = 0;
+    }
 }
 
 
 void canPitch(float canMessage) 
 {
-    pitchValue =  canMessage;
-   
-    LED_DEBUG4_TOGGLE;
+    pitchValue = canMessage;
 }
 

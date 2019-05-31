@@ -186,7 +186,7 @@ void InitPwm(void)
 void SetPwm(int a,int b )
 {
     
-    LED_DEBUG4_OFF;
+    LED_DEBUG4_OFF();
    
     
             
@@ -266,14 +266,14 @@ void InitPorts(void)
 //  Port.D.ClearBits(BIT_3);
   Port.D.SetBits(BIT_3);
 
-  LED_STATUS_OFF;
-  LED_ERROR_OFF;
-  LED_CAN_OFF;
-  LED_DEBUG4_OFF;
-  LED_DEBUG3_OFF;
-  LED_DEBUG2_OFF;
-  LED_DEBUG1_OFF;
-  LED_DEBUG0_OFF;
+  LED_STATUS_OFF();
+  LED_ERROR_OFF();
+  LED_CAN_OFF();
+  LED_DEBUG4_OFF();
+  LED_DEBUG3_OFF();
+  LED_DEBUG2_OFF();
+  LED_DEBUG1_OFF();
+  LED_DEBUG0_OFF();
   
   /* P12 Board Pins usability */
   
@@ -362,20 +362,25 @@ void InitCan(void)
 {
   Can.Initialize(CAN1, Can1MessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
 
-  // Switches from steering wheel
+  // Channel 1 receives CAN messages from the steering wheel buttons (only works in manual mode)
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, VOLANT_SW_MSG, CAN_FILTER_MASK0, 0x7FF);
+  
+  // Channel 2 sets the pitch mode of the drive
+  // automatic = accepts inputs from steering wheel (channel 1) AND automatic pitch control (channel 3)
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, ID_PITCH_MODE_SID, CAN_FILTER_MASK0, 0x7FF);
-  Can.SetChannel(CAN1, CAN_CHANNEL3, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL3, CAN_FILTER2, ID_PITCH_VALUE, CAN_FILTER_MASK0, 0x7FF);
-  Can.SetChannel(CAN1, CAN_CHANNEL4, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL4, CAN_FILTER3, TURBINE_RPM_ID, CAN_FILTER_MASK0, 0x7FF);
   
-  // CAN Channel pour le nbr de steps
-  Can.SetChannel(CAN1, CAN_CHANNEL5, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL5, CAN_FILTER4, 0x43, CAN_FILTER_MASK0, 0x7FF);
-   
+  // Channel 3 receives the target pitch the drive should aim for as a number of steps (float)
+  // The drive will then automatically move 
+  Can.SetChannel(CAN1, CAN_CHANNEL3, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL3, CAN_FILTER2, ID_PITCH_TARGET, CAN_FILTER_MASK0, 0x7FF);
+  
+  // Channel 4 is for receiving an interrupt for ROPS
+  Can.SetChannel(CAN1, CAN_CHANNEL4, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL4, CAN_FILTER3, ID_ROPS, CAN_FILTER_MASK0, 0x7FF);
+  
+  
   Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }
 

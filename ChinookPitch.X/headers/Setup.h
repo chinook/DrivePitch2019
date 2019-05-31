@@ -67,6 +67,7 @@ void StartInterrupts  (void);
 //==============================================================================
 // Macro definitions
 //==============================================================================
+/*
 #define INIT_TIMER          InitTimer()
 #define INIT_PWM            InitPwm()
 #define INIT_PORTS          InitPorts()
@@ -79,6 +80,7 @@ void StartInterrupts  (void);
 #define INIT_ADC            InitAdc()
 #define INIT_INPUT_CAPTURE  InitInputCapture()
 #define START_INTERRUPTS    StartInterrupts()
+*/
 
 //==============================================================================
 // Define OUTPUT LED
@@ -106,60 +108,50 @@ void StartInterrupts  (void);
 
 
 /* Setup IO LED */
-#define LED_DEBUG0_ON       Port.B.ClearBits(BIT_8)
-#define LED_DEBUG1_ON       Port.B.ClearBits(BIT_9)
-#define LED_DEBUG2_ON       Port.B.ClearBits(BIT_10)
-#define LED_DEBUG3_ON       Port.B.ClearBits(BIT_11)
-#define LED_DEBUG4_ON       Port.B.ClearBits(BIT_12)
-#define LED_ERROR_ON        Port.B.ClearBits(BIT_15)
-#define LED_CAN_ON          Port.B.ClearBits(BIT_13)
-#define LED_STATUS_ON       Port.F.ClearBits(BIT_3)
+#define LED_DEBUG0_ON()       Port.B.ClearBits(BIT_8)
+#define LED_DEBUG1_ON()       Port.B.ClearBits(BIT_9)
+#define LED_DEBUG2_ON()       Port.B.ClearBits(BIT_10)
+#define LED_DEBUG3_ON()       Port.B.ClearBits(BIT_11)
+#define LED_DEBUG4_ON()       Port.B.ClearBits(BIT_12)
+#define LED_ERROR_ON()        Port.B.ClearBits(BIT_15)
+#define LED_CAN_ON()          Port.B.ClearBits(BIT_13)
+#define LED_STATUS_ON()       Port.F.ClearBits(BIT_3)
 
-#define LED_DEBUG0_OFF      Port.B.SetBits(BIT_8)
-#define LED_DEBUG1_OFF      Port.B.SetBits(BIT_9)
-#define LED_DEBUG2_OFF      Port.B.SetBits(BIT_10)
-#define LED_DEBUG3_OFF      Port.B.SetBits(BIT_11)
-#define LED_DEBUG4_OFF      Port.B.SetBits(BIT_12)
-#define LED_ERROR_OFF       Port.B.SetBits(BIT_15)
-#define LED_CAN_OFF         Port.B.SetBits(BIT_13)
-#define LED_STATUS_OFF      Port.F.SetBits(BIT_3)
+#define LED_DEBUG0_OFF()      Port.B.SetBits(BIT_8)
+#define LED_DEBUG1_OFF()      Port.B.SetBits(BIT_9)
+#define LED_DEBUG2_OFF()      Port.B.SetBits(BIT_10)
+#define LED_DEBUG3_OFF()      Port.B.SetBits(BIT_11)
+#define LED_DEBUG4_OFF()      Port.B.SetBits(BIT_12)
+#define LED_ERROR_OFF()       Port.B.SetBits(BIT_15)
+#define LED_CAN_OFF()         Port.B.SetBits(BIT_13)
+#define LED_STATUS_OFF()      Port.F.SetBits(BIT_3)
 
-#define LED_DEBUG0_TOGGLE   Port.B.ToggleBits(BIT_8)
-#define LED_DEBUG1_TOGGLE   Port.B.ToggleBits(BIT_9)
-#define LED_DEBUG2_TOGGLE   Port.B.ToggleBits(BIT_10)
-#define LED_DEBUG3_TOGGLE   Port.B.ToggleBits(BIT_11)
-#define LED_DEBUG4_TOGGLE   Port.B.ToggleBits(BIT_12)
-#define LED_ERROR_TOGGLE    Port.B.ToggleBits(BIT_15)
-#define LED_CAN_TOGGLE      Port.B.ToggleBits(BIT_13)
-#define LED_STATUS_TOGGLE   Port.F.ToggleBits(BIT_3)
+#define LED_DEBUG0_TOGGLE()   Port.B.ToggleBits(BIT_8)
+#define LED_DEBUG1_TOGGLE()   Port.B.ToggleBits(BIT_9)
+#define LED_DEBUG2_TOGGLE()   Port.B.ToggleBits(BIT_10)
+#define LED_DEBUG3_TOGGLE()   Port.B.ToggleBits(BIT_11)
+#define LED_DEBUG4_TOGGLE()   Port.B.ToggleBits(BIT_12)
+#define LED_ERROR_TOGGLE()    Port.B.ToggleBits(BIT_15)
+#define LED_CAN_TOGGLE()      Port.B.ToggleBits(BIT_13)
+#define LED_STATUS_TOGGLE()   Port.F.ToggleBits(BIT_3)
 
+#define SET_M1INA()         Port.B.SetBits(BIT_2);
+#define SET_M1INB()         Port.B.SetBits(BIT_3);
+#define SET_M1EN()          Port.B.SetBits(BIT_0);
+#define SET_M2INA()         Port.E.SetBits(BIT_4);
+#define SET_M2INB()         Port.F.SetBits(BIT_3);
+#define SET_M2EN()          Port.F.SetBits(BIT_4);
+#define SET_A0()            Port.G.SetBits(BIT_2);
+#define SET_A1()            Port.G.SetBits(BIT_3);
 
-#define P12_1_ON      Port.B.SetBits(BIT_2) //M1INA
-#define P12_2_ON      Port.B.SetBits(BIT_3) //M1INB
-#define P12_3_ON      Port.B.SetBits(BIT_0) //M1EN/DIAG
-#define P12_4_ON      Port.E.SetBits(BIT_4) //M2INA
-#define P12_5_ON      Port.F.SetBits(BIT_3) //M2INB
-#define P12_6_ON      Port.F.SetBits(BIT_4) //M2EN/DIAG
-#define P12_7_ON      Port.B.SetBits(BIT_1)
-#define P12_8_ON      Port.E.SetBits(BIT_3)
-#define P12_9_ON      Port.F.SetBits(BIT_5)
-#define P12_15_ON      Port.G.SetBits(BIT_2)//A0
-#define P12_16_ON      Port.G.SetBits(BIT_3)//A1
-
-
-
-#define P12_1_OFF      Port.B.ClearBits(BIT_2)
-#define P12_2_OFF      Port.B.ClearBits(BIT_3)
-#define P12_3_OFF      Port.B.ClearBits(BIT_0)
-#define P12_4_OFF      Port.E.ClearBits(BIT_4)
-#define P12_5_OFF      Port.F.ClearBits(BIT_3)
-#define P12_6_OFF      Port.F.ClearBits(BIT_4)
-#define P12_7_OFF      Port.B.ClearBits(BIT_1)
-#define P12_8_OFF      Port.E.ClearBits(BIT_3)
-#define P12_9_OFF      Port.F.ClearBits(BIT_5)
-#define P12_15_OFF     Port.G.ClearBits(BIT_2)
-#define P12_16_OFF     Port.G.ClearBits(BIT_3)
-
+#define CLR_M1INA()      Port.B.ClearBits(BIT_2);
+#define CLR_M1INB()      Port.B.ClearBits(BIT_3);
+#define CLR_M1EN()       Port.B.ClearBits(BIT_0);
+#define CLR_M2INA()      Port.E.ClearBits(BIT_4);
+#define CLR_M2INB()      Port.F.ClearBits(BIT_3);
+#define CLR_M2EN()       Port.F.ClearBits(BIT_4);
+#define CLR_A0()         Port.G.ClearBits(BIT_2);
+#define CLR_A1()         Port.G.ClearBits(BIT_3);
 
 
 
@@ -191,11 +183,11 @@ void StartInterrupts  (void);
 
 
 /* Setup  IO switch */
-#define READ_SW1    Port.E.ReadBits(BIT_5) >> 5
-#define READ_SW2    Port.E.ReadBits(BIT_6) >> 6
-#define READ_SW3    Port.E.ReadBits(BIT_7) >> 7
+#define READ_SW1()    Port.E.ReadBits(BIT_5) >> 5
+#define READ_SW2()    Port.E.ReadBits(BIT_6) >> 6
+#define READ_SW3()    Port.E.ReadBits(BIT_7) >> 7
 
-#define READ_LED_DEBUG2 Port.B.ReadBits(BIT_10)
+#define READ_LED_DEBUG2() Port.B.ReadBits(BIT_10)
 
 
 //==============================================================================

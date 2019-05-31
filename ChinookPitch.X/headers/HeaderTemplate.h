@@ -33,7 +33,7 @@
 
 /**************************************************************
  * Function name  : TemplateFunction
- * Purpose        : Give a template for developpers to start from.
+ * Purpose        : Give a template for developers to start from.
  * Arguments      : None.
  * Returns        : 0 on success, -1 on failure.
  *************************************************************/

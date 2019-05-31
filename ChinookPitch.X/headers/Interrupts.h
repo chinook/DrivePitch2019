@@ -233,7 +233,8 @@ volatile BOOL  oAdcReady,
                oMaintainPitch,
                oPitchDone,
                oPitchMode,
-               oFlagStep;
+               oFlagStep,
+               bROPS;
 //==============================================================================
 // VARIABLES
 //==============================================================================
