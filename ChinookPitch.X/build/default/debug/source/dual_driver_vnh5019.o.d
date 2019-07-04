@@ -69,4 +69,6 @@ headers/dual_driver_vnh5019.h  \
  ../../ChinookLib/ChinookLib.X/headers/ChinookSkadi.h  \
  ../../ChinookLib/ChinookLib.X/headers/ChinookUart.h  \
  ../../ChinookLib/ChinookLib.X/headers/ChinookSpi.h  \
- ../../ChinookLib/ChinookLib.X/headers/ChinookWdt.h 
+ ../../ChinookLib/ChinookLib.X/headers/ChinookWdt.h  \
+ headers/StateMachine.h  \
+headers/StateFunctions.h 

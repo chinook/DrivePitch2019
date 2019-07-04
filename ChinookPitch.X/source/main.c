@@ -121,73 +121,41 @@ void main(void)
 //=================================================================
   
     StateInit();
-    // pStatePitch = &StateInit;
-    // InitPwm();
   
     pStatePitch = &StateInit;
+    
+    oPitchMode = PITCH_MODE_AUTOMATIC;
   
   
 	while(1)  //infinite loop
 	{
-        // If the ROPS bool is active, disregard everything and BRAKE !
+        // If the ROPS bool is active, disregard everything and BRAKE MARIO !
         if(bROPS)
-        { 
+            LED_DEBUG3_ON();
+        else
+            LED_DEBUG3_OFF();
+        while(bROPS)
+        {
             // Go back to zero pitch (for now we assume that 0 of drive = 0 absolute)
             int n;
             int direction;
-            if(current_pitch < 0)
+            if(current_pitch < drapeau_pitch)
                 direction = FWD;
             else
                 direction = BWD;
-
-            while((abs(current_pitch) - 0.51) > 0)
+            
+            float delta = current_pitch - drapeau_pitch;
+            if(abs(delta) >= 1.01)
             {
                 // Quarter step in the direction
                 oneStep(direction, FULSTEP);
 
                 // RPM delay  --  frequency = 4 MHZ
-                for(n = 0; n < 40000; ++n);
+                for(n = 0; n < 100000; ++n);
             }
-      
-            // Don't execute anything else until ROPS braking is over
-            continue;
         }
         
         (*pStatePitch)(); // jump to next state
         StateScheduler();
-
-        // Start as manual mode
-        if (1)
-        {
-            //manuel 
-            LED_DEBUG0_ON(); 
-        }
-        else 
-        { 
-            //auto
-            LED_DEBUG0_OFF();   
-        }
-
-        // Forward stepping if SW2 is pressed
-        if (!(READ_SW2()))
-        {
-            oPitchMode = PITCH_MODE_MANUAL;
-            
-            //LED_DEBUG2_ON();
-            for (n=0; n < 300000; n++);
-
-            oneStep(FWD, FULSTEP);   
-        }
-
-        // Backwards stepping if SW3 is pressed
-        if(!(READ_SW3()))
-        {
-            oPitchMode = PITCH_MODE_MANUAL;
-            
-            //LED_DEBUG3_ON();
-            for (n=0; n < 300000; n++);
-
-            oneStep(BWD, FULSTEP); 
-        }
     }
 } //END MAIN CODE

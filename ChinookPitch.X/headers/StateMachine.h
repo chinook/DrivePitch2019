@@ -61,6 +61,7 @@ volatile float pitchValue,
 
 volatile float current_pitch;
 volatile float target_pitch;
+volatile float drapeau_pitch;
 volatile float rops_steps;
 
 #define IsPitchDone() (current_pitch == target_pitch)

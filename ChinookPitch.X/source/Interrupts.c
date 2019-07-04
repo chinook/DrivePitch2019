@@ -464,6 +464,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         // Update the pitch target value
         target_pitch = current_pitch + nbPitch;
         LED_CAN_ON();
+        //LED_DEBUG3_ON();
         
         CANUpdateChannel(CAN1, CAN_CHANNEL3);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
@@ -478,14 +479,16 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
         message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
         int x = *(int*)&message->data[0];
-        rops_steps = *(int*)&message->data[4];
+        rops_steps = *(float*)&message->data[4];
+        //float steps = *(float*)&message->data[0];
+        drapeau_pitch = current_pitch + rops_steps;
         
         // Do we fire the ROPS ?
         bROPS = x;
-        if(bROPS)
-            LED_DEBUG3_ON();
-        else
-            LED_DEBUG3_OFF();
+        //if(bROPS)
+        //    LED_DEBUG3_ON();
+        //else
+        //    LED_DEBUG3_OFF();
       
         CANUpdateChannel(CAN1, CAN_CHANNEL4);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
@@ -524,12 +527,12 @@ void canVolant(UINT16 canMessage)
     if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON) && !oPitchDone)
     {
         target_pitch = current_pitch + PITCH_RESOLUTION;
-        LED_DEBUG3_ON(); 
+        //LED_DEBUG3_ON(); 
         oCmdUpPitch = 1;
     } 
     else
     {
-        LED_DEBUG3_OFF();
+        //LED_DEBUG3_OFF();
         LED_DEBUG0_OFF();
         oCmdUpPitch = 0;
     }

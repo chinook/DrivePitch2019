@@ -63,7 +63,7 @@ void StateScheduler(void)
     {
       pStatePitch = &StateSendDataPitch;  // SendData state
     }
-    else if((oCmdDownPitch || oCmdUpPitch || (IsPitchDone())))
+    else if((oCmdDownPitch || oCmdUpPitch || (!IsPitchDone())))
     {
       pStatePitch = &StateMotorMotion;    // Motion state
     }   
@@ -209,15 +209,18 @@ void StateInit(void)
     current_pitch = 0;
     target_pitch = 0;
     
-    firstRun = 1 ;
-    oPitchMode =1 ; 
-    oFlagAcq=1;
+    firstRun = 1;
+    oPitchMode = 1; 
+    oFlagAcq = 1;
 }
 
 //===============================================================
 // Name     : State1
 // Purpose  : TBD.
 //===============================================================
+//
+// TODO : Re-evaluate if still necessary !!
+//
 void StateAcq(void)
 {
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -353,56 +356,77 @@ void StateMotorMotion(void)
         {
              LED_DEBUG1_OFF();
         }
+        
     }
     else if(oPitchMode == PITCH_MODE_AUTOMATIC)
     {
         int n; 
-        for (n = 0; n < 9000; n++);
-
+        for (n = 0; n < 10000; n++);
+        
         int direction;
         if(current_pitch < target_pitch)
             direction = FWD;
         else
             direction = BWD;
-
+        
         while(current_pitch != target_pitch)
         {
+            if(bROPS)
+                break;
             // Quarter step in the direction
-            oneStep(direction, QRTRSTEP);
+            oneStep(direction, FULSTEP);
             
-            for(n = 0; n < 100000; ++n);
+            
+            // Check if we're done
+            float delta = target_pitch - current_pitch;
+            if(abs(delta) <= 1.01f)
+            {
+                oPitchDone = 1;
+                // Send pitch done CAN message
+                Can.SendByte(CAN1, 0x35, 1);
+                break;
+            }
+            
+            
+            for(n = 0; n < 200000; ++n);
         }
     }
-    
-    oFlagAcq = 1;
-    SEND_PITCH_DONE;
 }
 
+// TODO : Re-evaluate if necessary
 void StateCalibPitch(void)
 {  
-  SetZeroPitch();
+  //SetZeroPitch();
 }
 
-void StateIdlePitch(void){}
+void StateIdlePitch(void)
+{
+    // Assess buttons
+    // Forward stepping if SW2 is pressed
+    oCmdDownPitch = 0;
+    if (!(READ_SW2()))
+    {
+        oPitchMode = PITCH_MODE_MANUAL;
+        oCmdDownPitch = 1;
+        LED_DEBUG4_ON();
+    }
 
+    // Backwards stepping if SW3 is pressed
+    oCmdUpPitch = 0;
+    if(!(READ_SW3()))
+    {
+        oPitchMode = PITCH_MODE_MANUAL;
+        oCmdUpPitch = 1;
+        LED_DEBUG4_ON();
+    }
+}
+
+// TODO : Check if this state is still relevant
+// Probably change to simply un-torque the stepper
 void StateBrakePitch(void)
 {
-    /*
-    while (current_pitch > 10)
-    {
-        int n; 
-        for (n = 0; n < 100000; n++);
+    // Enlever le holding torque du stepper !
     
-        if (current_pitch >= 180)
-        {
-            oneStep(FWD, FULSTEP);
-        }
-        else
-        {
-            oneStep(BWD, FULSTEP);
-        } 
-    }
-    */
 }
 
 //void StateAcqPitch(void){}
@@ -410,22 +434,3 @@ void StateBrakePitch(void)
 void StateSendDataPitch(void){}
 
 void StateRegPitch(void){}
-
-void setUpPitch(void)
-{
-    int n;
-    for (n = 0; n < 200000; n++);
-    
-    LED_DEBUG1_TOGGLE();
-    oneStep(FWD, QRTRSTEP);
-}
-
-void setDownPitch(void){
-    int j;
-    while (pitchValue > setPitch)
-    {
-        for (j = 0; j < 200000; j++);
-        
-        oneStep(BWD, QRTRSTEP);
-    }
-}
