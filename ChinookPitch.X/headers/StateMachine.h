@@ -31,23 +31,10 @@
 // State Machine public function prototypes
 //==============================================================================
 void StateInit      (void);   // Initialization state of the system
-void StateAcq       (void);   // First state. User can rename it as needed
-//void State2         (void);   // Second state. User can rename it as needed
-void StateError     (void);   // Error state. User should assess and corret errors in this state
 void StateScheduler (void);   // State Scheduler. Decides which state is next
-                              // depending on current state and flags. Used as a function
-
-
 
 void StateIdlePitch(void);           // State where we stay when nothing is happening on the system.
-void StateAcqPitch(void);            // Acquisition state 
-void StateBrakePitch(void);          // Brake state (electrical brake)
-void StateSendDataPitch(void);       // Send Data on CAN state
 void StateMotorMotion(void);         // Move motor
-void StateRegPitch(void);             // Regualtes the pitch to maintain position.
-void StateCalibPitch(void);
-void setUpPitch(void);
-void setDownPitch(void);
 
 //==============================================================================
 // Variable declarations
@@ -72,15 +59,8 @@ volatile float rops_steps;
 enum PitchModeEnum
 {
     PITCH_MODE_MANUAL,
-    PITCH_MODE_AUTOMATIC,
-    PTICH_MODE_NBR
+    PITCH_MODE_AUTOMATIC
 };
-
-#define MAX_TURB_RPM 1000
-
-
-
-
 
 
 //==============================================================================
@@ -135,5 +115,3 @@ typedef struct sButtonStates
 } sButtonStates_t;
 
 #endif	/* __STATE_MACHINE_H__ */
-
-volatile extern float windTurbine;

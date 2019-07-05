@@ -7,10 +7,8 @@
       <itemPath>headers/StateMachine.h</itemPath>
       <itemPath>headers/Setup.h</itemPath>
       <itemPath>headers/Interrupts.h</itemPath>
-      <itemPath>headers/StateFunctions.h</itemPath>
       <itemPath>headers/HardwareProfile.h</itemPath>
       <itemPath>headers/HeaderTemplate.h</itemPath>
-      <itemPath>headers/SkadiFunctions.h</itemPath>
       <itemPath>headers/dual_driver_vnh5019.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -24,9 +22,6 @@
       <itemPath>source/StateMachine.c</itemPath>
       <itemPath>source/Interrupts.c</itemPath>
       <itemPath>source/Setup.c</itemPath>
-      <itemPath>source/StateFunctions.c</itemPath>
-      <itemPath>source/SourceTemplate.c</itemPath>
-      <itemPath>source/SkadiFunctions.c</itemPath>
       <itemPath>source/dual_driver_vnh5019.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -391,20 +386,6 @@
         <property key="voltagevalue" value="3.25"/>
       </PICkit3PlatformTool>
       <item path="headers/HeaderTemplate.h" ex="false" overriding="false">
-        <C32>
-        </C32>
-        <C32-AR>
-        </C32-AR>
-        <C32-AS>
-        </C32-AS>
-        <C32-LD>
-        </C32-LD>
-        <C32CPP>
-        </C32CPP>
-        <C32Global>
-        </C32Global>
-      </item>
-      <item path="source/SourceTemplate.c" ex="false" overriding="false">
         <C32>
         </C32>
         <C32-AR>

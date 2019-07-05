@@ -72,13 +72,6 @@ void oneStep(int dir, int stepdiv){
         Pwm.SetDutyCycle(PWM_2, halfstepPwm_a);
         Pwm.SetDutyCycle(PWM_3, halfstepPwm_b);
 
-        // What does this even do?
-        //int pwm2 = Pwm.ReadDutyCycle(PWM_2);
-        //int pwm3 = Pwm.ReadDutyCycle(PWM_3);
-        //peak here
-        //pwm2++;
-        //pwm3++;
-
         break;
     case 3: // quarter step
         updateDriver(38, 92, BWD, FWD);

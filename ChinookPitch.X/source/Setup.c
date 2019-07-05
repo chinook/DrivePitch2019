@@ -34,33 +34,6 @@
 #include <stdlib.h>
 #include "ChinookCanUtils.h"
 
-
-
-//==============================================================================
-//	Variable Declaration
-//==============================================================================
-
-
-
-
-
-
-/***********************************
- * Table of functions used in Skadi
- **********************************/
-sSkadiCommand_t skadiCommandTable[] =
-{
-   {"LedDebug"    , LedDebug    , 1, "Usage : flash Led DEBUG"}   // 1 argument
-  ,{"LedCan"      , LedCan      , 1, "Usage : flash Led CAN"}     // 1 argument
-  ,{"ReInitSystem", ReInitSystem, 0, "Redo StateInit()"}          // 0 argument
-};
-
-
-//==============================================================================
-//	INIT FUNCTIONS
-//==============================================================================
-
-
 //===========================
 //	INIT TIMERS
 //===========================
@@ -185,24 +158,16 @@ void InitPwm(void)
 
 void SetPwm(int a,int b )
 {
-    
     LED_DEBUG4_OFF();
-   
     
-            
     int a_pourcent = (a*10)-1 ;
     int b_pourcent = (b*10)-1 ;
-    
     
     Pwm.SetDutyCycle  (PWM_2,a-1 );
     Pwm.SetPulseOffset(PWM_2,0);
     
-    
     Pwm.SetDutyCycle  (PWM_3,b-1);
     Pwm.SetPulseOffset(PWM_3,0);
-
-    
-
 }
 //===========================
 //	INIT PORTS
@@ -291,8 +256,6 @@ void InitPorts(void)
   
   Port.G.SetPinsAnalogIn(BIT_2);    //A0 (m1cs)
   Port.G.SetPinsAnalogIn(BIT_3);    //A1 (m2cs)
-
-
 }
 
 
@@ -301,7 +264,6 @@ void InitPorts(void)
 //===========================
 void InitUart (void)
 {
-
   UartConfig_t       oConfig      = UART_ENABLE_PINS_TX_RX_ONLY;
   UartFifoMode_t     oFifoMode    = UART_INTERRUPT_ON_TX_BUFFER_EMPTY | UART_INTERRUPT_ON_RX_NOT_EMPTY;
   UartLineCtrlMode_t oLineControl = UART_DATA_SIZE_8_BITS | UART_PARITY_NONE | UART_STOP_BITS_1;
@@ -341,19 +303,7 @@ void InitUart (void)
   Uart.ConfigInterrupt(UART5, UART5_INTERRUPT_PRIORITY, UART5_INTERRUPT_SUBPRIORITY);
   Uart.ConfigInterrupt(UART6, UART6_INTERRUPT_PRIORITY, UART6_INTERRUPT_SUBPRIORITY);
 #endif
-  
 }
-
-
-//===========================
-//	INIT SKADI
-//===========================
-void InitSkadi(void)
-{
-//  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART1, FALSE);   // This system does not use UART interrupts
-  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART1, TRUE);   // This system uses UART interrupts
-}
-
 
 //===========================
 //	INIT CAN BUS
@@ -379,7 +329,6 @@ void InitCan(void)
   // Channel 4 is for receiving an interrupt for ROPS
   Can.SetChannel(CAN1, CAN_CHANNEL4, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL4, CAN_FILTER3, ID_ROPS, CAN_FILTER_MASK0, 0x7FF);
-  
   
   Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }
@@ -562,12 +511,11 @@ void StartInterrupts(void)
 // Enable CAN interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   Can.EnableInterrupt(CAN1);
-
+  
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable multi-vector interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
   INTEnableInterrupts();
-
 }
