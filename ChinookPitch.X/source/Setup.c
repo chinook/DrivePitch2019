@@ -158,7 +158,7 @@ void InitPwm(void)
 
 void SetPwm(int a,int b )
 {
-    LED_DEBUG4_OFF();
+    //LED_DEBUG4_OFF();
     
     int a_pourcent = (a*10)-1 ;
     int b_pourcent = (b*10)-1 ;
@@ -314,7 +314,8 @@ void InitCan(void)
 
   // Channel 1 receives CAN messages from the steering wheel buttons (only works in manual mode)
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, VOLANT_SW_MSG, CAN_FILTER_MASK0, 0x7FF);
+  //Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, VOLANT_SW_MSG, CAN_FILTER_MASK0, 0x7FF);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x43, CAN_FILTER_MASK0, 0x7FF);
   
   // Channel 2 sets the pitch mode of the drive
   // automatic = accepts inputs from steering wheel (channel 1) AND automatic pitch control (channel 3)
@@ -329,6 +330,10 @@ void InitCan(void)
   // Channel 4 is for receiving an interrupt for ROPS
   Can.SetChannel(CAN1, CAN_CHANNEL4, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL4, CAN_FILTER3, ID_ROPS, CAN_FILTER_MASK0, 0x7FF);
+  
+  // Channel 5 is for emergency pitch stop
+  Can.SetChannel(CAN1, CAN_CHANNEL5, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL5, CAN_FILTER4, ID_EMERGENCY_STOP, CAN_FILTER_MASK0, 0x7FF);
   
   Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }

@@ -173,22 +173,39 @@ void StateIdlePitch(void)
     int i;
     for(i = 0; i < 10000; ++i);
     
+    //oPitchMode = PITCH_MODE_MANUAL;
+    
     // Assess buttons
     // Forward stepping if SW2 is pressed
-    oCmdDownPitch = 0;
+    
+    //oCmdDownPitch = 0;
+    static int last_cmd_down = 0;
     if (!(READ_SW2()))
     {
+        last_cmd_down = 1;
         oPitchMode = PITCH_MODE_MANUAL;
         oCmdDownPitch = 1;
-        LED_DEBUG4_ON();
+        //LED_DEBUG4_ON();
+    }
+    else if(last_cmd_down)
+    {
+        last_cmd_down = 0;
+        oCmdDownPitch = 0;
     }
 
     // Backwards stepping if SW3 is pressed
-    oCmdUpPitch = 0;
+    //oCmdUpPitch = 0;
+    static int last_cmd_up = 0;
     if(!(READ_SW3()))
     {
+        last_cmd_up = 1;
         oPitchMode = PITCH_MODE_MANUAL;
         oCmdUpPitch = 1;
-        LED_DEBUG4_ON();
+        //LED_DEBUG4_ON();
+    }
+    else if(last_cmd_up)
+    {
+        last_cmd_up = 0;
+        oCmdUpPitch = 0;
     }
 }

@@ -125,15 +125,28 @@ void main(void)
     pStatePitch = &StateInit;
     
     oPitchMode = PITCH_MODE_AUTOMATIC;
-  
+    
+    for(i = 0; i < 10000; ++i);
+    SEND_PITCH_MODE;
+    
   
 	while(1)  //infinite loop
 	{
+        static int last_mode = PITCH_MODE_AUTOMATIC;
+        if(last_mode != oPitchMode)
+        {
+            last_mode = oPitchMode;
+            SEND_PITCH_MODE;
+        }
         // If the ROPS bool is active, disregard everything and BRAKE MARIO !
         if(bROPS)
             LED_DEBUG3_ON();
         else
             LED_DEBUG3_OFF();
+        if(oPitchMode == PITCH_MODE_MANUAL)
+            LED_DEBUG4_ON();
+        else
+            LED_DEBUG4_OFF();
         while(bROPS)
         {
             // Go back to zero pitch (for now we assume that 0 of drive = 0 absolute)

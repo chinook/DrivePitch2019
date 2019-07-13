@@ -416,11 +416,11 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         // are pressed (Pitch up, Pitch down buttons)
         
         CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
+        
         message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
-    
+        
         LED_CAN_ON();
-      
+        
         canVolant((message->data[1]<<8)|message->data[0]);
       
         CANUpdateChannel(CAN1, CAN_CHANNEL1);
@@ -440,12 +440,12 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         if(mode == 0)
         {
             oPitchMode = PITCH_MODE_MANUAL;
-            LED_DEBUG4_ON();
+            //LED_DEBUG4_ON();
         }
         else if(mode == 1)
         {
             oPitchMode = PITCH_MODE_AUTOMATIC;
-            LED_DEBUG4_OFF();
+            //LED_DEBUG4_OFF();
         }
         
         SEND_PITCH_MODE;
@@ -489,6 +489,19 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         CANUpdateChannel(CAN1, CAN_CHANNEL4);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
+    else if(CANGetPendingEventCode(CAN1) == CAN_CHANNEL5_EVENT)
+    {
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+        
+        message = CANGetRxMessage(CAN1, CAN_CHANNEL5);
+        LED_CAN_ON();
+        
+        if(!bROPS)
+            target_pitch = current_pitch;
+        
+        CANUpdateChannel(CAN1, CAN_CHANNEL4);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
   }
 
   // The CAN1 Interrupt flag is  cleared at the end of the interrupt routine.
@@ -506,12 +519,12 @@ void canVolant(UINT16 canMessage)
         return;
     
     // Bouton de gauche
-    if (((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && !oPitchDone)
+    if (((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON))// && !oPitchDone)
     {
-        target_pitch = current_pitch - PITCH_RESOLUTION;
+        //target_pitch = current_pitch - 10;//PITCH_RESOLUTION;
         LED_DEBUG2_ON();
         oCmdDownPitch = 1;
-    } 
+    }
     else 
     {
         LED_DEBUG2_OFF();
@@ -520,9 +533,9 @@ void canVolant(UINT16 canMessage)
     }
         
     // Bouton de droite
-    if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON) && !oPitchDone)
+    if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))// && !oPitchDone)
     {
-        target_pitch = current_pitch + PITCH_RESOLUTION;
+        //target_pitch = current_pitch + 10;//PITCH_RESOLUTION;
         //LED_DEBUG3_ON(); 
         oCmdUpPitch = 1;
     } 
@@ -535,7 +548,7 @@ void canVolant(UINT16 canMessage)
     
     if (!(((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && (canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))
     {
-        oPitchDone = 0;
+         oPitchDone = 0;
     }
 }
 
