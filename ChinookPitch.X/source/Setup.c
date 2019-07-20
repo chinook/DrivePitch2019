@@ -315,7 +315,7 @@ void InitCan(void)
   // Channel 1 receives CAN messages from the steering wheel buttons (only works in manual mode)
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
   //Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, VOLANT_SW_MSG, CAN_FILTER_MASK0, 0x7FF);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x43, CAN_FILTER_MASK0, 0x7FF);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0xAA, CAN_FILTER_MASK0, 0x7FF);
   
   // Channel 2 sets the pitch mode of the drive
   // automatic = accepts inputs from steering wheel (channel 1) AND automatic pitch control (channel 3)

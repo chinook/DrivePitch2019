@@ -130,6 +130,10 @@ void StateMotorMotion(void)
     }
     else if(oPitchMode == PITCH_MODE_AUTOMATIC)
     {
+        // Failsafe for "vers l'infini et l'au-dela"
+        if(abs(target_pitch - current_pitch) > 1000)
+            target_pitch = current_pitch;
+        
         int n; 
         for (n = 0; n < 10000; n++);
         
@@ -153,10 +157,9 @@ void StateMotorMotion(void)
             {
                 oPitchDone = 1;
                 // Send pitch done CAN message
-                Can.SendByte(CAN1, 0x35, 1);
+                Can.SendData(CAN1, 0x35, 1);
                 break;
             }
-            
             
             for(n = 0; n < 100000; ++n);
         }
@@ -169,7 +172,17 @@ void StateIdlePitch(void)
     if(IsPitchDone() && !oCmdDownPitch && !oCmdUpPitch)
     {
         updateDriver(0, 0, FWD, FWD);
+        //Can.SendData(CAN1, 0x35, 1);
     }
+    
+    // Failsafe in case we missed the pitch done CAN message
+    static int mem_pitch_done = 0;
+    if(!mem_pitch_done && oPitchDone)
+    {
+        Can.SendData(CAN1, 0x35, 1);
+        mem_pitch_done = 1;
+    }
+    
     int i;
     for(i = 0; i < 10000; ++i);
     

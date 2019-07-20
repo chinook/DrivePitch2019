@@ -465,6 +465,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         target_pitch = current_pitch + nbPitch;
         LED_CAN_ON();
         
+        Can.SendData(CAN1, 0x35, 0);
+        
         CANUpdateChannel(CAN1, CAN_CHANNEL3);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
