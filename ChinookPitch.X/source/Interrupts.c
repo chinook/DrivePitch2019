@@ -502,7 +502,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
             target_pitch = current_pitch;
         
         CANUpdateChannel(CAN1, CAN_CHANNEL4);
-        CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+        CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
   }
 
@@ -517,11 +517,11 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 void canVolant(UINT16 canMessage)
 {
     // If we are not in manual mode, discard this command
-    if(oPitchMode != PITCH_MODE_MANUAL)
-        return;
+    //if(oPitchMode != PITCH_MODE_MANUAL)
+    //    return;
     
     // Bouton de gauche
-    if (((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON))// && !oPitchDone)
+    if (oPitchMode == PITCH_MODE_MANUAL && ((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON))// && !oPitchDone)
     {
         //target_pitch = current_pitch - 10;//PITCH_RESOLUTION;
         LED_DEBUG2_ON();
@@ -535,7 +535,7 @@ void canVolant(UINT16 canMessage)
     }
         
     // Bouton de droite
-    if (((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))// && !oPitchDone)
+    if (oPitchMode == PITCH_MODE_MANUAL && ((canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))// && !oPitchDone)
     {
         //target_pitch = current_pitch + 10;//PITCH_RESOLUTION;
         //LED_DEBUG3_ON(); 
@@ -548,7 +548,7 @@ void canVolant(UINT16 canMessage)
         oCmdUpPitch = 0;
     }
     
-    if (!(((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && (canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))
+    if (oPitchMode == PITCH_MODE_MANUAL && !(((canMessage & PITCH_MINUS_BUTTON) == PITCH_MINUS_BUTTON) && (canMessage & PITCH_PLUS_BUTTON) == PITCH_PLUS_BUTTON))
     {
          oPitchDone = 0;
     }

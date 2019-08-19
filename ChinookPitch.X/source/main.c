@@ -129,6 +129,7 @@ void main(void)
     for(i = 0; i < 10000; ++i);
     SEND_PITCH_MODE;
     
+    Can.SendData(CAN1, 0x35, 1);
   
 	while(1)  //infinite loop
 	{
@@ -147,9 +148,11 @@ void main(void)
             LED_DEBUG4_ON();
         else
             LED_DEBUG4_OFF();
+        
+        
+        
         while(bROPS)
         {
-            // Go back to zero pitch (for now we assume that 0 of drive = 0 absolute)
             int n;
             int direction;
             if(current_pitch < drapeau_pitch)

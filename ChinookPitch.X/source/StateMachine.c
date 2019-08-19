@@ -46,6 +46,7 @@ void StateScheduler(void)
   {
     pStatePitch = &StateIdlePitch;        // Idle state
   }
+  
   if (pStatePitch == &StateIdlePitch)
   {
     if((oCmdDownPitch || oCmdUpPitch || (!IsPitchDone())))
@@ -98,6 +99,13 @@ void StateInit(void)
 
 void StateMotorMotion(void)
 {
+    // Make sure commands up and down are 0 in automatic mode
+    if(oPitchMode == PITCH_MODE_AUTOMATIC)
+    {
+        oCmdUpPitch = 0;
+        oCmdDownPitch = 0;
+    }
+        
     int n = 0;
     for(n = 0; n < 50000; ++n);
     
