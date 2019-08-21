@@ -52,7 +52,7 @@ void StateScheduler(void)
     if((oCmdDownPitch || oCmdUpPitch || (!IsPitchDone())))
     {
       pStatePitch = &StateMotorMotion;    // Motion state
-    }   
+    }
     else
     {
       pStatePitch = &StateIdlePitch;      // Go to Error state by default
@@ -158,10 +158,9 @@ void StateMotorMotion(void)
             // Quarter step in the direction
             oneStep(direction, FULSTEP);
             
-            
             // Check if we're done
             float delta = target_pitch - current_pitch;
-            if(abs(delta) <= 1.01f)
+            if(abs(delta) <= 2.01f)
             {
                 oPitchDone = 1;
                 // Send pitch done CAN message

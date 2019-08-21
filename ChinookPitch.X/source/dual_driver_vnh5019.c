@@ -103,7 +103,7 @@ void oneStep(int dir, int stepdiv){
         break;
     case 7: // quarter step
         updateDriver(92, 38, BWD, BWD);
-
+        
         Pwm.SetDutyCycle(PWM_2, qrtstepPwm_b);
         Pwm.SetDutyCycle(PWM_3, qrtstepPwm_a);  
 

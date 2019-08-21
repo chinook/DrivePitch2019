@@ -498,8 +498,11 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         message = CANGetRxMessage(CAN1, CAN_CHANNEL5);
         LED_CAN_ON();
         
-        if(!bROPS)
-            target_pitch = current_pitch;
+        //if(!bROPS)
+        //    target_pitch = current_pitch;
+        
+        // Restart the drive
+        SoftReset();
         
         CANUpdateChannel(CAN1, CAN_CHANNEL4);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
