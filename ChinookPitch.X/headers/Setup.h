@@ -206,6 +206,6 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
 #define HORN_FAN_RPM_SID                  0x92
 
 
-#define SEND_PITCH_MODE      Can.SendByte(CAN1, ID_PITCH_MODE_OUT, (BYTE) oPitchMode)
-#define SEND_PITCH_DONE      Can.SendByte(CAN1, ID_PITCH_DONE, (BYTE) oPitchDone)
+#define SEND_PITCH_MODE      Can.SendData(CAN1, ID_PITCH_MODE_OUT, (UINT64) oPitchMode)
+#define SEND_PITCH_DONE      Can.SendData(CAN1, ID_PITCH_DONE, (UINT64) oPitchDone)
 #endif	/* __SETUP_H__ */

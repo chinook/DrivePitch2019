@@ -124,12 +124,13 @@ void main(void)
   
     pStatePitch = &StateInit;
     
-    oPitchMode = PITCH_MODE_AUTOMATIC;
+    oPitchMode = PITCH_MODE_MANUAL;
     
     for(i = 0; i < 10000; ++i);
     SEND_PITCH_MODE;
     
     Can.SendData(CAN1, 0x35, 1);
+    oPitchDone = 1;
   
 	while(1)  //infinite loop
 	{
@@ -148,8 +149,6 @@ void main(void)
             LED_DEBUG4_ON();
         else
             LED_DEBUG4_OFF();
-        
-        
         
         while(bROPS)
         {

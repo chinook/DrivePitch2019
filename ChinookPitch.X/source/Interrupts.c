@@ -502,9 +502,12 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         //    target_pitch = current_pitch;
         
         // Restart the drive
+        Can.SendData(CAN1, 0x35, 1);
+        int i;
+        for(i = 0; i < 1000; ++i)
         SoftReset();
         
-        CANUpdateChannel(CAN1, CAN_CHANNEL4);
+        CANUpdateChannel(CAN1, CAN_CHANNEL5);
         CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
   }

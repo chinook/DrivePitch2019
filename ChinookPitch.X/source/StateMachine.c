@@ -93,7 +93,7 @@ void StateInit(void)
     target_pitch = 0;
     
     firstRun = 1;
-    oPitchMode = 1; 
+    //oPitchMode = 1; 
     oFlagAcq = 1;
 }
 
@@ -139,8 +139,8 @@ void StateMotorMotion(void)
     else if(oPitchMode == PITCH_MODE_AUTOMATIC)
     {
         // Failsafe for "vers l'infini et l'au-dela"
-        if(abs(target_pitch - current_pitch) > 1000)
-            target_pitch = current_pitch;
+        //if(abs(target_pitch - current_pitch) > 1000)
+        //    target_pitch = current_pitch;
         
         int n; 
         for (n = 0; n < 10000; n++);
@@ -151,24 +151,47 @@ void StateMotorMotion(void)
         else
             direction = BWD;
         
-        while(current_pitch != target_pitch)
+        /*
+        static float direction_avg = 0;
+        direction_avg += (float)direction;
+        static int count = 0;
+        ++count;
+        if(count >= 9)
         {
-            if(bROPS)
-                break;
-            // Quarter step in the direction
-            oneStep(direction, FULSTEP);
-            
-            // Check if we're done
-            float delta = target_pitch - current_pitch;
-            if(abs(delta) <= 2.01f)
+            count = 0;
+            float avg = direction_avg / 10;
+            if(abs(avg - 0.5) >= 0.1f)
             {
                 oPitchDone = 1;
-                // Send pitch done CAN message
                 Can.SendData(CAN1, 0x35, 1);
                 break;
             }
-            
-            for(n = 0; n < 100000; ++n);
+        }
+        */
+        
+        //while(current_pitch != target_pitch)
+        if(current_pitch != target_pitch)
+        {
+            int l = 0;
+            for(l = 0; l < 10; ++l)
+            {
+                if(bROPS)
+                    break;
+                // Quarter step in the direction
+                oneStep(direction, HALFSTEP);
+
+                // Check if we're done
+                float delta = target_pitch - current_pitch;
+                if(abs(delta) <= 2.01f)
+                {
+                    oPitchDone = 1;
+                    // Send pitch done CAN message
+                    Can.SendData(CAN1, 0x35, 1);
+                    break;
+                }
+
+                for(n = 0; n < 100000; ++n);
+            }
         }
     }
 }
